@@ -64,17 +64,12 @@ CS216-TeamKryptonite-UTXO-Simulator/
     ```bash
     pip install -r requirements.txt
     ```
-4.  Navigate to the source folder:
+4.  Navigate to the source folder and run the interactive menu:
     ```bash
-    cd src
+    python -m src.main
     ```
-5.  Run the interactive menu:
-    ```bash
-    python main.py
-    ```
+
 ## System Architecture
-
-
 
 The system is designed around a modular architecture where the `UTXOManager` serves as the central source of truth.
 
