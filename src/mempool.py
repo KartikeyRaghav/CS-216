@@ -1,4 +1,4 @@
-from validator import validate_transaction
+from src.validator import validate_transaction
 
 class Mempool:
     def __init__(self, max_size=50):
