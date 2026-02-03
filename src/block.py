@@ -17,6 +17,9 @@ def mine_block(miner, mempool, utxo_manager, num_txs=5):
 
         mempool.remove_transaction(tx["tx_id"])
 
-    utxo_manager.add_utxo("coinbase", 0, total_fees, miner)
-    print(f"Miner {miner} receives {total_fees} BTC")
+    block_reward = 3.125
+    coinbase_txid = f"coinbase_{utxo_manager.block_height}"
+    utxo_manager.add_utxo(coinbase_txid, 0, block_reward + total_fees, miner)
+    utxo_manager.block_height += 1
+    print(f"Miner {miner} receives {block_reward + total_fees} BTC")
     print("Block mined successfully!")

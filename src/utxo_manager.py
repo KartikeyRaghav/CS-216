@@ -1,6 +1,7 @@
 class UTXOManager:
     def __init__(self):
         self.utxo_set = {}
+        self.block_height = 0
 
     def add_utxo(self, tx_id, index, amount, owner):
         self.utxo_set[(tx_id, index)] = (amount, owner)

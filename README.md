@@ -60,11 +60,7 @@ CS216-TeamKryptonite-UTXO-Simulator/
 ### Execution Steps
 1.  Clone this repository or download the source code.
 2.  Open a terminal in the project directory.
-3.  Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Navigate to the source folder and run the interactive menu:
+3.  Navigate to the parent folder and run the interactive menu:
     ```bash
     python -m src.main
     ```
@@ -90,6 +86,8 @@ Before a transaction enters the mempool, the `Validator` module enforces consens
 The mempool acts as a holding area for unconfirmed transactions.
 * **Conflict Resolution:** It enforces a "First-Seen" rule. If a transaction attempts to spend a UTXO that is already referenced by another transaction in the pool, it is rejected immediately.
 * **Mining Selection:** Transactions remain here until a miner selects them for a block.
+* **Optional Unconfirmed Chains:** The simulator can optionally allow spending of unconfirmed transaction outputs to mimic Bitcoin’s mempool chaining behavior.
+
 
 ### 4. Mining Simulation
 The mining process simulates the creation of a new block:
@@ -110,6 +108,7 @@ The simulator includes a suite of test scenarios to verify the integrity of the 
 | **3. Mempool Conflict** | Two conflicting transactions are sent rapidly. | The first transaction is accepted; the second is rejected based on the "First-Seen" rule. |
 | **4. Insufficient Funds** | User tries to send more coins than the referenced UTXOs contain. | Transaction is rejected due to insolvency. |
 
+Additional edge cases such as zero-fee transactions, negative outputs, and race attacks are covered in the automated test suite.
 ---
 
 ## References

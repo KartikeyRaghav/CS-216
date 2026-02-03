@@ -10,7 +10,15 @@ def validate_transaction(tx, utxo_manager, mempool):
             return False, "Double-spend inside transaction"
 
         if not utxo_manager.exists(*key):
-            return False, f"UTXO {key} does not exist"
+            if not mempool.allow_unconfirmed:
+                return False, f"UTXO {key} does not exist"
+            if mempool.allow_unconfirmed:
+                for t in mempool.transactions:
+                    for i, out in enumerate(t["tx"]["outputs"]):
+                        if (t["tx"]["tx_id"], i) == key:
+                            total_in += out["amount"]
+                            seen.add(key)
+                            break
 
         if key in mempool.spent_utxos:
             return False, f"UTXO {key} already spent by mempool transaction"

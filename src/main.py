@@ -2,10 +2,11 @@ from src.utxo_manager import UTXOManager
 from src.mempool import Mempool
 from src.block import mine_block
 from tests.test_scenarios import run_tests
+import uuid
 
 def main():
     utxo_manager = UTXOManager()
-    mempool = Mempool()
+    mempool = Mempool(allow_unconfirmed=True)
 
     genesis = [
         ("Alice", 50.0),
@@ -18,11 +19,12 @@ def main():
     for i, (owner, amt) in enumerate(genesis):
         utxo_manager.add_utxo("genesis", i, amt, owner)
 
+    print("\n=== Bitcoin Transaction Simulator ===")
+    print("Initial UTXOs (Genesis Block):")
+    for owner, amt in genesis:
+        print(f"- {owner} : {amt} BTC")
+        
     while True:
-        print("\n=== Bitcoin Transaction Simulator ===")
-        print("Initial UTXOs (Genesis Block):")
-        for owner, amt in genesis:
-            print(f"- {owner} : {amt} BTC")
 
         print("\nMain Menu:")
         print("1. Create new transaction")
@@ -33,7 +35,7 @@ def main():
         print("6. Exit")
 
         choice = input("\nEnter choice: ").strip()
-        
+
         if choice == "1":
             sender = input("Enter sender: ")
             balance = utxo_manager.get_balance(sender)
@@ -43,64 +45,65 @@ def main():
             amount = float(input("Enter amount: "))
 
             utxos = utxo_manager.get_utxos_for_owner(sender)
+            if not utxos:
+                print("FAIL - No UTXOs available for sender")
+                continue
+
             inputs = []
             total = 0.0
 
-            for tx_id, idx, amt in utxos:
-                inputs.append({
-                    "prev_tx": tx_id,
-                    "index": idx,
-                    "owner": sender
-                })
+            for txid, idx, amt in utxos:
+                inputs.append({"prev_tx": txid, "index": idx, "owner": sender})
                 total += amt
-                if total >= amount + 0.001:
+                if total >= amount:
                     break
 
             if total < amount:
-                print("Insufficient funds")
+                print("FAIL - Insufficient funds")
                 continue
 
+            outputs = [{"amount": amount, "address": receiver}]
             change = round(total - amount - 0.001, 6)
 
-            outputs = [{"amount": amount, "address": receiver}]
+            if change < 0:
+                print("FAIL - Not enough balance to pay fee")
+                continue
+
             if change > 0:
                 outputs.append({"amount": change, "address": sender})
 
-            tx = {
-                "tx_id": f"tx_{sender}_{receiver}_{len(mempool.transactions)}",
-                "inputs": inputs,
-                "outputs": outputs
-            }
+            tx = {"tx_id": str(uuid.uuid4()), "inputs": inputs, "outputs": outputs}
 
             ok, msg = mempool.add_transaction(tx, utxo_manager)
-            print(msg)
+            print("PASS" if ok else "FAIL", msg)
+
         elif choice == "2":
-            print("\nUTXO Set:")
-            for (tx_id, idx), (amt, owner) in utxo_manager.utxo_set.items():
-                print(f"{tx_id}:{idx} -> {amt} BTC ({owner})")
+            print("\n--- UTXO Set ---")
+            for (txid, idx), (amt, owner) in utxo_manager.utxo_set.items():
+                print(f"{txid}:{idx} → {owner} : {amt} BTC")
 
         elif choice == "3":
-            print("\nMempool:")
+            print("\n--- Mempool ---")
             if not mempool.transactions:
-                print("Mempool empty")
+                print("(empty)")
             for t in mempool.transactions:
-                print(t)
+                tx = t["tx"]
+                print(f"TX {tx['tx_id']} | Fee: {t['fee']} BTC")
 
         elif choice == "4":
-            miner = input("Enter miner name: ")
-            print("Mining block...")
+            miner = input("Miner name: ").strip()
             mine_block(miner, mempool, utxo_manager)
 
         elif choice == "5":
-            run_tests(utxo_manager, mempool)
+            run_tests()
 
         elif choice == "6":
-            print("Exiting...")
+            print("Exiting simulator.")
             break
 
         else:
-            print("Invalid choice!")
+            print("Invalid choice. Try again.")
+
 
 if __name__ == "__main__":
     main()
-

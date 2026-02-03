@@ -1,15 +1,20 @@
 from src.validator import validate_transaction
 
 class Mempool:
-    def __init__(self, max_size=50):
+    def __init__(self, max_size=50, allow_unconfirmed=False):
         self.transactions = []
         self.spent_utxos = set()
         self.max_size = max_size
+        self.allow_unconfirmed = allow_unconfirmed
 
     def add_transaction(self, tx, utxo_manager):
         valid, result = validate_transaction(tx, utxo_manager, self)
         if not valid:
             return False, result
+        
+        for i, out in enumerate(tx["outputs"]):
+            self.spent_utxos.discard((tx["tx_id"], i))
+
 
         for inp in tx["inputs"]:
             self.spent_utxos.add((inp["prev_tx"], inp["index"]))
