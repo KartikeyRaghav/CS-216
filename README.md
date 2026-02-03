@@ -109,6 +109,7 @@ The simulator includes a suite of test scenarios to verify the integrity of the 
 | **4. Insufficient Funds** | User tries to send more coins than the referenced UTXOs contain. | Transaction is rejected due to insolvency. |
 
 Additional edge cases such as zero-fee transactions, negative outputs, and race attacks are covered in the automated test suite.
+
 ---
 
 ## References
