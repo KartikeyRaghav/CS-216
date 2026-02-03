@@ -1,2 +1,4 @@
-# No external dependencies required
-# Uses only Python standard library
+# Dependency Information:
+# - Implemented entirely using the Python Standard Library
+# - No third-party libraries or external frameworks required
+# - Compatible with any default Python 3 installation
